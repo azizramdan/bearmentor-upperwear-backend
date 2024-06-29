@@ -8,7 +8,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "${DOCKER_POSTGRES_PORT}:5432"
+      - '${DOCKER_POSTGRES_PORT}:5432'
     environment:
       POSTGRES_PASSWORD: ${DOCKER_POSTGRES_PASSWORD}
       POSTGRES_USER: ${DOCKER_POSTGRES_USER}
@@ -21,6 +21,4 @@ services:
     image: azizramdan/bearmentor-upperwear-app
     restart: always
     ports:
-      - "${DOCKER_APP_PORT}:3000"
-    env_file:
-      - .env
+      - '${DOCKER_APP_PORT}:3000'

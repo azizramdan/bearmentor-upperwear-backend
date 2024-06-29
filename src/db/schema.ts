@@ -1,12 +1,12 @@
-import { pgTable, varchar, text, json, integer, doublePrecision, timestamp, unique } from 'drizzle-orm/pg-core';
-import { createId } from '@paralleldrive/cuid2';
+import { doublePrecision, integer, pgTable, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
+import { createId } from '@paralleldrive/cuid2'
 
 export const categories = pgTable('categories', {
   id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
   name: varchar('name', { length: 255 }).unique().notNull(),
   createdAt: timestamp('createdAt').defaultNow(),
   updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
-});
+})
 
 export const products = pgTable('products', {
   id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
@@ -15,7 +15,7 @@ export const products = pgTable('products', {
   categoryId: varchar('categoryId', { length: 255 }).notNull().references(() => categories.id),
   createdAt: timestamp('createdAt').defaultNow(),
   updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
-});
+})
 
 export const productColors = pgTable(
   'productColors',
@@ -30,9 +30,9 @@ export const productColors = pgTable(
     updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
   },
   t => ({
-    productIdColorUnique: unique('productIdColorUnique').on(t.productId, t.color)
-  })
-);
+    productIdColorUnique: unique('productIdColorUnique').on(t.productId, t.color),
+  }),
+)
 
 export const variants = pgTable('variants', {
   id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
@@ -40,7 +40,7 @@ export const variants = pgTable('variants', {
   productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
   createdAt: timestamp('createdAt').defaultNow(),
   updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
-});
+})
 
 export const variantOptions = pgTable(
   'variantOptions',
@@ -56,6 +56,6 @@ export const variantOptions = pgTable(
     updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
   },
   t => ({
-    variantIdProductColorIdUnique: unique().on(t.variantId, t.productColorId, t.name)
-  })
-);
+    variantIdProductColorIdUnique: unique().on(t.variantId, t.productColorId, t.name),
+  }),
+)

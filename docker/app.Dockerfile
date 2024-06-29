@@ -1,4 +1,4 @@
-FROM oven/bun:alpine as builder
+FROM oven/bun:alpine AS builder
 
 ENV PORT=3000
 
@@ -8,7 +8,7 @@ COPY package.json bun.lockb ./
 
 RUN bun install --frozen-lockfile --production
 
-FROM oven/bun:alpine as runner
+FROM oven/bun:alpine AS runner
 
 WORKDIR /home/bun/app
 

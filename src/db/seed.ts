@@ -1,20 +1,20 @@
-import { db, postgresConnection } from './db'
 import * as dbSchema from '../db/schema'
-import { buildConflictUpdateColumns } from '../utils/db';
+import { buildConflictUpdateColumns } from '../utils/db'
+import { db, postgresConnection } from './db'
 
 (async () => {
   const categories = [
     {
       id: '1',
-      name: 'T-Shirt'
+      name: 'T-Shirt',
     },
     {
       id: '2',
-      name: 'Shirt'
+      name: 'Shirt',
     },
     {
       id: '3',
-      name: 'Jaket'
+      name: 'Jaket',
     },
   ]
 
@@ -74,7 +74,7 @@ import { buildConflictUpdateColumns } from '../utils/db';
               stock: 50,
               price: 110000,
             },
-          ]
+          ],
         },
         {
           name: 'Boxy Ease Tee Denim',
@@ -83,7 +83,7 @@ import { buildConflictUpdateColumns } from '../utils/db';
           imageUrls: [
             'https://livehaf.com/cdn/shop/files/BoxyEaseTeeDenim_160x.jpg?v=1709805706',
             'https://livehaf.com/cdn/shop/files/BoxyEaseTeeDenim1_160x.jpg?v=1709805706',
-            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeDenim3_160x.jpg?v=1709805706'
+            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeDenim3_160x.jpg?v=1709805706',
           ],
           variantOptions: [
             {
@@ -107,15 +107,15 @@ import { buildConflictUpdateColumns } from '../utils/db';
               stock: 50,
               price: 110000,
             },
-          ]
+          ],
         },
       ],
       variants: [
         {
           id: '1',
           name: 'Size',
-        }
-      ]
+        },
+      ],
     },
     {
       id: '2',
@@ -151,7 +151,7 @@ import { buildConflictUpdateColumns } from '../utils/db';
           imageUrls: [
             'https://livehaf.com/cdn/shop/files/BreezyLongShirtBlack3_160x.jpg?v=1708483362',
             'https://livehaf.com/cdn/shop/files/BreezyLongShirtBlack5_160x.jpg?v=1708483362',
-            'https://livehaf.com/cdn/shop/files/BreezyLongShirtBlack1_160x.jpg?v=1708483362'
+            'https://livehaf.com/cdn/shop/files/BreezyLongShirtBlack1_160x.jpg?v=1708483362',
           ],
           variantOptions: [
             {
@@ -175,7 +175,7 @@ import { buildConflictUpdateColumns } from '../utils/db';
               stock: 50,
               price: 150000,
             },
-          ]
+          ],
         },
         {
           name: 'Breezy Long Shirt Navy',
@@ -208,15 +208,15 @@ import { buildConflictUpdateColumns } from '../utils/db';
               stock: 50,
               price: 150000,
             },
-          ]
+          ],
         },
       ],
       variants: [
         {
           id: '2',
           name: 'Size',
-        }
-      ]
+        },
+      ],
     },
   ]
 
@@ -245,10 +245,10 @@ import { buildConflictUpdateColumns } from '../utils/db';
 
     await db
       .insert(dbSchema.variants)
-      .values(product.variants.map(variant => {
+      .values(product.variants.map((variant) => {
         return {
           ...variant,
-          productId: product.id
+          productId: product.id,
         }
       }))
       .onConflictDoUpdate({
@@ -264,7 +264,7 @@ import { buildConflictUpdateColumns } from '../utils/db';
         .insert(dbSchema.productColors)
         .values({
           ...productColor,
-          productId: product.id
+          productId: product.id,
         })
         .onConflictDoUpdate({
           target: [dbSchema.productColors.productId, dbSchema.productColors.color],
@@ -279,10 +279,10 @@ import { buildConflictUpdateColumns } from '../utils/db';
 
       await db
         .insert(dbSchema.variantOptions)
-        .values(productColor.variantOptions.map(variantOption => {
+        .values(productColor.variantOptions.map((variantOption) => {
           return {
             ...variantOption,
-            productColorId: productColorDb[0].id
+            productColorId: productColorDb[0].id,
           }
         }))
         .onConflictDoUpdate({
