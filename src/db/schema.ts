@@ -1,5 +1,6 @@
 import { doublePrecision, integer, pgTable, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
 import { createId } from '@paralleldrive/cuid2'
+import { relations } from 'drizzle-orm'
 
 export const categories = pgTable('categories', {
   id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
@@ -59,3 +60,39 @@ export const variantOptions = pgTable(
     variantIdProductColorIdUnique: unique().on(t.variantId, t.productColorId, t.name),
   }),
 )
+
+export const productsRelations = relations(products, ({ one, many }) => ({
+  category: one(categories, {
+    fields: [products.categoryId],
+    references: [categories.id],
+  }),
+  productColors: many(productColors),
+  variants: many(variants),
+}))
+
+export const productColorsRelations = relations(productColors, ({ one, many }) => ({
+  product: one(products, {
+    fields: [productColors.productId],
+    references: [products.id],
+  }),
+  variantOptions: many(variantOptions),
+}))
+
+export const variantsRelations = relations(variants, ({ one, many }) => ({
+  product: one(products, {
+    fields: [variants.productId],
+    references: [products.id],
+  }),
+  variantOptions: many(variantOptions),
+}))
+
+export const variantOptionsRelations = relations(variantOptions, ({ one }) => ({
+  variant: one(variants, {
+    fields: [variantOptions.variantId],
+    references: [variants.id],
+  }),
+  productColors: one(productColors, {
+    fields: [variantOptions.productColorId],
+    references: [productColors.id],
+  }),
+}))
