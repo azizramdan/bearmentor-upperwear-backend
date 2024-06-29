@@ -1,8 +1,10 @@
 import { swaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { WelcomePage } from './welcome'
+import { productRoutes } from './products/route'
 
 export default new OpenAPIHono({ strict: false })
+  .route('/api/products', productRoutes)
 
   .doc31('/api-spec', {
     openapi: '3.1.0',
