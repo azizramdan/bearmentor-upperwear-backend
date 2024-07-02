@@ -1,81 +1,113 @@
-CREATE TABLE IF NOT EXISTS "categories" (
+DO $$ BEGIN
+ CREATE TYPE "public"."productOptionIndex" AS ENUM('1', '2', '3');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."productStatus" AS ENUM('ACTIVE', 'ARCHIVED', 'DRAFT');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "productImages" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"name" varchar(255) NOT NULL,
+	"productId" varchar(255) NOT NULL,
+	"url" text NOT NULL,
 	"createdAt" timestamp DEFAULT now(),
-	"updatedAt" timestamp DEFAULT now(),
-	CONSTRAINT "categories_name_unique" UNIQUE("name")
+	"updatedAt" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "productColors" (
+CREATE TABLE IF NOT EXISTS "productOptionValues" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"name" varchar(255) NOT NULL,
-	"color" varchar(255) NOT NULL,
+	"productOptionId" varchar(255) NOT NULL,
+	"value" varchar(255) NOT NULL,
+	"position" integer NOT NULL,
+	"createdAt" timestamp DEFAULT now(),
+	"updatedAt" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "productOptions" (
+	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"productId" varchar(255) NOT NULL,
-	"slug" varchar(255) NOT NULL,
-	"imageUrls" text[] NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"index" "productOptionIndex" NOT NULL,
+	"position" "productOptionIndex" NOT NULL,
+	"createdAt" timestamp DEFAULT now(),
+	"updatedAt" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "productVariants" (
+	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"productId" varchar(255) NOT NULL,
+	"title" varchar(255) NOT NULL,
+	"sku" varchar(255) NOT NULL,
+	"price" double precision NOT NULL,
+	"imageId" varchar(255),
+	"optionValueId1" varchar(255) NOT NULL,
+	"optionValueId2" varchar(255),
+	"optionValueId3" varchar(255),
 	"createdAt" timestamp DEFAULT now(),
 	"updatedAt" timestamp DEFAULT now(),
-	CONSTRAINT "productColors_slug_unique" UNIQUE("slug"),
-	CONSTRAINT "productIdColorUnique" UNIQUE("productId","color")
+	CONSTRAINT "productVariants_sku_unique" UNIQUE("sku")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "products" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"name" varchar(255) NOT NULL,
-	"description" text NOT NULL,
-	"categoryId" varchar(255) NOT NULL,
-	"createdAt" timestamp DEFAULT now(),
-	"updatedAt" timestamp DEFAULT now()
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "variantOptions" (
-	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"variantId" varchar(255) NOT NULL,
-	"name" varchar(255) NOT NULL,
-	"sku" varchar(255) NOT NULL,
-	"stock" integer NOT NULL,
-	"price" double precision NOT NULL,
-	"productColorId" varchar(255) NOT NULL,
+	"title" varchar(255) NOT NULL,
+	"slug" varchar(255) NOT NULL,
+	"descriptionHtml" text NOT NULL,
+	"status" "productStatus" NOT NULL,
+	"publishedAt" timestamp,
 	"createdAt" timestamp DEFAULT now(),
 	"updatedAt" timestamp DEFAULT now(),
-	CONSTRAINT "variantOptions_sku_unique" UNIQUE("sku"),
-	CONSTRAINT "variantOptions_variantId_productColorId_name_unique" UNIQUE("variantId","productColorId","name")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "variants" (
-	"id" varchar(255) PRIMARY KEY NOT NULL,
-	"name" varchar(255) NOT NULL,
-	"productId" varchar(255) NOT NULL,
-	"createdAt" timestamp DEFAULT now(),
-	"updatedAt" timestamp DEFAULT now()
+	CONSTRAINT "products_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "productColors" ADD CONSTRAINT "productColors_productId_products_id_fk" FOREIGN KEY ("productId") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "productImages" ADD CONSTRAINT "productImages_productId_products_id_fk" FOREIGN KEY ("productId") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "products" ADD CONSTRAINT "products_categoryId_categories_id_fk" FOREIGN KEY ("categoryId") REFERENCES "public"."categories"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "productOptionValues" ADD CONSTRAINT "productOptionValues_productOptionId_productOptions_id_fk" FOREIGN KEY ("productOptionId") REFERENCES "public"."productOptions"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "variantOptions" ADD CONSTRAINT "variantOptions_variantId_variants_id_fk" FOREIGN KEY ("variantId") REFERENCES "public"."variants"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "productOptions" ADD CONSTRAINT "productOptions_productId_products_id_fk" FOREIGN KEY ("productId") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "variantOptions" ADD CONSTRAINT "variantOptions_productColorId_productColors_id_fk" FOREIGN KEY ("productColorId") REFERENCES "public"."productColors"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "productVariants" ADD CONSTRAINT "productVariants_productId_products_id_fk" FOREIGN KEY ("productId") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "variants" ADD CONSTRAINT "variants_productId_products_id_fk" FOREIGN KEY ("productId") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "productVariants" ADD CONSTRAINT "productVariants_imageId_productImages_id_fk" FOREIGN KEY ("imageId") REFERENCES "public"."productImages"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "productVariants" ADD CONSTRAINT "productVariants_optionValueId1_productOptionValues_id_fk" FOREIGN KEY ("optionValueId1") REFERENCES "public"."productOptionValues"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "productVariants" ADD CONSTRAINT "productVariants_optionValueId2_productOptionValues_id_fk" FOREIGN KEY ("optionValueId2") REFERENCES "public"."productOptionValues"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "productVariants" ADD CONSTRAINT "productVariants_optionValueId3_productOptionValues_id_fk" FOREIGN KEY ("optionValueId3") REFERENCES "public"."productOptionValues"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

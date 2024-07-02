@@ -1,98 +1,110 @@
-import { doublePrecision, integer, pgTable, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
+import { doublePrecision, integer, pgEnum, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core'
 import { createId } from '@paralleldrive/cuid2'
 import { relations } from 'drizzle-orm'
 
-export const categories = pgTable('categories', {
-  id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
-  name: varchar('name', { length: 255 }).unique().notNull(),
-  createdAt: timestamp('createdAt').defaultNow(),
-  updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
-})
+export const productStatus = pgEnum('productStatus', ['ACTIVE', 'ARCHIVED', 'DRAFT'])
+export const productOptionIndex = pgEnum('productOptionIndex', ['1', '2', '3'])
 
 export const products = pgTable('products', {
   id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description').notNull(),
-  categoryId: varchar('categoryId', { length: 255 }).notNull().references(() => categories.id),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  descriptionHtml: text('descriptionHtml').notNull(),
+  status: productStatus('status').notNull(),
+  publishedAt: timestamp('publishedAt'),
   createdAt: timestamp('createdAt').defaultNow(),
   updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
 })
 
-export const productColors = pgTable(
-  'productColors',
-  {
-    id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
-    name: varchar('name', { length: 255 }).notNull(),
-    color: varchar('color', { length: 255 }).notNull(),
-    productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
-    slug: varchar('slug', { length: 255 }).unique().notNull(),
-    imageUrls: text('imageUrls').array().notNull(),
-    createdAt: timestamp('createdAt').defaultNow(),
-    updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
-  },
-  t => ({
-    productIdColorUnique: unique('productIdColorUnique').on(t.productId, t.color),
-  }),
-)
-
-export const variants = pgTable('variants', {
+export const productImages = pgTable('productImages', {
   id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
-  name: varchar('name', { length: 255 }).notNull(),
   productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
+  url: text('url').notNull(),
   createdAt: timestamp('createdAt').defaultNow(),
   updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
 })
 
-export const variantOptions = pgTable(
-  'variantOptions',
-  {
-    id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
-    variantId: varchar('variantId', { length: 255 }).notNull().references(() => variants.id),
-    name: varchar('name', { length: 255 }).notNull(),
-    sku: varchar('sku', { length: 255 }).unique().notNull(),
-    stock: integer('stock').notNull(),
-    price: doublePrecision('price').notNull(),
-    productColorId: varchar('productColorId', { length: 255 }).notNull().references(() => productColors.id),
-    createdAt: timestamp('createdAt').defaultNow(),
-    updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
-  },
-  t => ({
-    variantIdProductColorIdUnique: unique().on(t.variantId, t.productColorId, t.name),
-  }),
-)
+export const productOptions = pgTable('productOptions', {
+  id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
+  productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
+  name: varchar('name', { length: 255 }).notNull(),
+  index: productOptionIndex('index').notNull(),
+  position: productOptionIndex('position').notNull(),
+  createdAt: timestamp('createdAt').defaultNow(),
+  updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
+})
 
-export const productsRelations = relations(products, ({ one, many }) => ({
-  category: one(categories, {
-    fields: [products.categoryId],
-    references: [categories.id],
-  }),
-  productColors: many(productColors),
-  variants: many(variants),
+export const productOptionValues = pgTable('productOptionValues', {
+  id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
+  productOptionId: varchar('productOptionId', { length: 255 }).notNull().references(() => productOptions.id),
+  value: varchar('value', { length: 255 }).notNull(),
+  position: integer('position').notNull(),
+  createdAt: timestamp('createdAt').defaultNow(),
+  updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
+})
+
+export const productVariants = pgTable('productVariants', {
+  id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
+  productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
+  title: varchar('title', { length: 255 }).notNull(),
+  sku: varchar('sku', { length: 255 }).unique().notNull(),
+  price: doublePrecision('price').notNull(),
+  imageId: varchar('imageId', { length: 255 }).references(() => productImages.id),
+  optionValueId1: varchar('optionValueId1', { length: 255 }).notNull().references(() => productOptionValues.id),
+  optionValueId2: varchar('optionValueId2', { length: 255 }).references(() => productOptionValues.id),
+  optionValueId3: varchar('optionValueId3', { length: 255 }).references(() => productOptionValues.id),
+  createdAt: timestamp('createdAt').defaultNow(),
+  updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
+})
+
+export const productsRelations = relations(products, ({ many }) => ({
+  images: many(productImages),
+  options: many(productOptions),
+  variants: many(productVariants),
 }))
 
-export const productColorsRelations = relations(productColors, ({ one, many }) => ({
+export const productImagesRelations = relations(productImages, ({ one, many }) => ({
   product: one(products, {
-    fields: [productColors.productId],
+    fields: [productImages.productId],
     references: [products.id],
   }),
-  variantOptions: many(variantOptions),
+  variants: many(productVariants),
 }))
 
-export const variantsRelations = relations(variants, ({ one, many }) => ({
+export const productOptionsRelations = relations(productOptions, ({ one, many }) => ({
   product: one(products, {
-    fields: [variants.productId],
+    fields: [productOptions.productId],
     references: [products.id],
   }),
-  variantOptions: many(variantOptions),
+  values: many(productOptionValues),
 }))
 
-export const variantOptionsRelations = relations(variantOptions, ({ one }) => ({
-  variant: one(variants, {
-    fields: [variantOptions.variantId],
-    references: [variants.id],
+export const productOptionValuesRelations = relations(productOptionValues, ({ one, many }) => ({
+  option: one(productOptions, {
+    fields: [productOptionValues.productOptionId],
+    references: [productOptions.id],
   }),
-  productColors: one(productColors, {
-    fields: [variantOptions.productColorId],
-    references: [productColors.id],
+  variants1: many(productVariants),
+  variants2: many(productVariants),
+  variants3: many(productVariants),
+}))
+
+export const productVariantsRelations = relations(productVariants, ({ one }) => ({
+  product: one(products, {
+    fields: [productVariants.productId],
+    references: [products.id],
+  }),
+  image: one(productImages),
+  optionValue1: one(productOptionValues, {
+    fields: [productVariants.optionValueId1],
+    references: [productOptionValues.id],
+  }),
+  optionValue2: one(productOptionValues, {
+    fields: [productVariants.optionValueId2],
+    references: [productOptionValues.id],
+  }),
+  optionValue3: one(productOptionValues, {
+    fields: [productVariants.optionValueId3],
+    references: [productOptionValues.id],
   }),
 }))

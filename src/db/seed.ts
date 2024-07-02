@@ -3,26 +3,12 @@ import { buildConflictUpdateColumns } from '../utils/db'
 import { db, postgresConnection } from './db'
 
 (async () => {
-  const categories = [
-    {
-      id: '1',
-      name: 'T-Shirt',
-    },
-    {
-      id: '2',
-      name: 'Shirt',
-    },
-    {
-      id: '3',
-      name: 'Jaket',
-    },
-  ]
-
   const products = [
     {
       id: '1',
-      name: 'Boxy Ease Tee',
-      description: `
+      title: 'Boxy Ease Tee Black',
+      slug: 'boxy-ease-tee-black',
+      descriptionHtml: `
       Boxy Ease Tee adalah kaus casual yang memiliki potongan boxy-oversize yang dapat memberi ruang gerak yang maksimal.
 
       Terbuat dari kain Ultra Ease Stretch dengan spesifikasi khusus yang lembut, breathable dan anti-kusut menjadikan kaus ini nyaman dipakai untuk aktivitas sehari-hari.
@@ -41,194 +27,78 @@ import { db, postgresConnection } from './db'
       - Model menggunakan size XL
       - Tinggi & Berat Model: 185cm & 77kg
       `,
-      categoryId: '1',
-      productColors: [
+      status: dbSchema.productStatus.enumValues[0],
+      images: [
         {
-          name: 'Boxy Ease Tee Black',
-          color: 'Black',
-          slug: 'boxy-ease-tee-black',
-          imageUrls: [
-            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeBlack_160x.jpg?v=1709805463',
-            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeBlack1_a30cb2d9-67d4-4067-a75e-93682102b5b7_160x.jpg?v=1709805463',
-            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeBlack3_160x.jpg?v=1709805463',
-          ],
-          variantOptions: [
-            {
-              variantId: '1',
-              name: 'S',
-              sku: 'boxy-ease-tee-black-s',
-              stock: 10,
-              price: 99900,
-            },
-            {
-              variantId: '1',
-              name: 'M',
-              sku: 'boxy-ease-tee-black-m',
-              stock: 5,
-              price: 99900,
-            },
-            {
-              variantId: '1',
-              name: 'L',
-              sku: 'boxy-ease-tee-black-l',
-              stock: 50,
-              price: 110000,
-            },
-          ],
+          id: '1',
+          url: 'https://livehaf.com/cdn/shop/files/BoxyEaseTeeBlack.jpg?v=1709805463',
         },
         {
-          name: 'Boxy Ease Tee Denim',
-          color: 'Denim',
-          slug: 'boxy-ease-tee-denim',
-          imageUrls: [
-            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeDenim_160x.jpg?v=1709805706',
-            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeDenim1_160x.jpg?v=1709805706',
-            'https://livehaf.com/cdn/shop/files/BoxyEaseTeeDenim3_160x.jpg?v=1709805706',
-          ],
-          variantOptions: [
-            {
-              variantId: '1',
-              name: 'S',
-              sku: 'boxy-ease-tee-denim-s',
-              stock: 10,
-              price: 99900,
-            },
-            {
-              variantId: '1',
-              name: 'M',
-              sku: 'boxy-ease-tee-denim-m',
-              stock: 5,
-              price: 99900,
-            },
-            {
-              variantId: '1',
-              name: 'L',
-              sku: 'boxy-ease-tee-denim-l',
-              stock: 50,
-              price: 110000,
-            },
+          id: '2',
+          url: 'https://livehaf.com/cdn/shop/files/BoxyEaseTeeBlack1_a30cb2d9-67d4-4067-a75e-93682102b5b7.jpg?v=1709805463',
+        },
+        {
+          id: '3',
+          url: 'https://livehaf.com/cdn/shop/files/BoxyEaseTeeBlack3.jpg?v=1709805463',
+        },
+      ],
+      options: [
+        {
+          id: '1',
+          name: 'Size',
+          index: dbSchema.productOptionIndex.enumValues[0],
+          position: dbSchema.productOptionIndex.enumValues[0],
+          values: [
+            { id: '1', value: 'S', position: 1 },
+            { id: '2', value: 'M', position: 2 },
+            { id: '3', value: 'L', position: 3 },
+            { id: '4', value: 'XL', position: 4 },
+            { id: '5', value: 'XXL', position: 5 },
           ],
         },
       ],
       variants: [
         {
           id: '1',
-          name: 'Size',
+          title: 'Boxy Ease Tee Black - S',
+          sku: 'BETB-S',
+          price: 99000,
+          imageId: '1',
+          optionValueId1: '1',
         },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Breezy Long Shirt',
-      description: `
-      Breezy Long Shirt adalah kemeja pria klasik lengan panjang  dengan siluet loose fit untuk anda yang menginginkan kenyamanan maksimal saat beraktivitas. 
-    
-      Permukaan kain Rayon Softblend Airflow yang lembut, stretch, anti gerah, dan tidak mudah kusut membuat anda semakin produktif dalam beraktivitas.
-    
-      Warna kancing pada Breezy Long Shirt yang dipilih secara serasi dengan kemejanya memberikan tampilan yang lebih eksklusif
-    
-      Kemeja ini juga dapat dijadikan sebagai outer dengan paduan kaus untuk tampilan layer yang lebih casual dan stylish
-    
-      Breezy Long Shirt memiliki 4 varian warna klasik yang dapat anda pilih
-    
-      - Bahan: Rayon Softblend Airflow
-      - Loose fit 
-      - Stretch 
-      - Breathable
-      - Anti Lecek 
-      - Front Button Opening
-      - Dapat dijadikan Outer
-      - Terdapat kancing pada bagian kerah & ujung lengan
-      - Model menggunakan size XL
-      - Tinggi & Berat Model: 185cm & 77kg
-      `,
-      categoryId: '2',
-      productColors: [
-        {
-          name: 'Breezy Long Shirt Black',
-          color: 'Black',
-          slug: 'breezy-long-shirt-black',
-          imageUrls: [
-            'https://livehaf.com/cdn/shop/files/BreezyLongShirtBlack3_160x.jpg?v=1708483362',
-            'https://livehaf.com/cdn/shop/files/BreezyLongShirtBlack5_160x.jpg?v=1708483362',
-            'https://livehaf.com/cdn/shop/files/BreezyLongShirtBlack1_160x.jpg?v=1708483362',
-          ],
-          variantOptions: [
-            {
-              variantId: '2',
-              name: 'S',
-              sku: 'breezy-long-shirt-black-s',
-              stock: 10,
-              price: 139000,
-            },
-            {
-              variantId: '2',
-              name: 'M',
-              sku: 'breezy-long-shirt-black-m',
-              stock: 5,
-              price: 139000,
-            },
-            {
-              variantId: '2',
-              name: 'L',
-              sku: 'breezy-long-shirt-black-l',
-              stock: 50,
-              price: 150000,
-            },
-          ],
-        },
-        {
-          name: 'Breezy Long Shirt Navy',
-          color: 'Navy',
-          slug: 'breezy-long-shirt-navy',
-          imageUrls: [
-            'https://livehaf.com/cdn/shop/files/BreezyLongShirtNavy1_160x.jpg?v=1708483399',
-            'https://livehaf.com/cdn/shop/files/BreezyLongShirtNavy3_160x.jpg?v=1708483399',
-            'https://livehaf.com/cdn/shop/files/BreezyLongShirtNavy4_160x.jpg?v=1708483399',
-          ],
-          variantOptions: [
-            {
-              variantId: '2',
-              name: 'S',
-              sku: 'breezy-long-shirt-navy-s',
-              stock: 10,
-              price: 139000,
-            },
-            {
-              variantId: '2',
-              name: 'M',
-              sku: 'breezy-long-shirt-navy-m',
-              stock: 5,
-              price: 139000,
-            },
-            {
-              variantId: '2',
-              name: 'L',
-              sku: 'breezy-long-shirt-navy-l',
-              stock: 50,
-              price: 150000,
-            },
-          ],
-        },
-      ],
-      variants: [
         {
           id: '2',
-          name: 'Size',
+          title: 'Boxy Ease Tee Black - M',
+          sku: 'BETB-M',
+          price: 99000,
+          imageId: '2',
+          optionValueId1: '2',
+        },
+        {
+          id: '3',
+          title: 'Boxy Ease Tee Black - L',
+          sku: 'BETB-L',
+          price: 99000,
+          imageId: '3',
+          optionValueId1: '3',
+        },
+        {
+          id: '4',
+          title: 'Boxy Ease Tee Black - XL',
+          sku: 'BETB-XL',
+          price: 99000,
+          optionValueId1: '4',
+        },
+        {
+          id: '5',
+          title: 'Boxy Ease Tee Black - XXL',
+          sku: 'BETB-XXL',
+          price: 99000,
+          optionValueId1: '5',
         },
       ],
     },
   ]
-
-  await db
-    .insert(dbSchema.categories)
-    .values(categories)
-    .onConflictDoUpdate({
-      target: dbSchema.categories.id,
-      set: buildConflictUpdateColumns(dbSchema.products, [
-        'name',
-      ]),
-    })
 
   for (const product of products) {
     await db
@@ -237,14 +107,67 @@ import { db, postgresConnection } from './db'
       .onConflictDoUpdate({
         target: dbSchema.products.id,
         set: buildConflictUpdateColumns(dbSchema.products, [
-          'name',
-          'description',
-          'categoryId',
+          'title',
+          'slug',
+          'descriptionHtml',
+          'status',
+          'publishedAt',
         ]),
       })
 
     await db
-      .insert(dbSchema.variants)
+      .insert(dbSchema.productImages)
+      .values(product.images.map((image) => {
+        return {
+          ...image,
+          productId: product.id,
+        }
+      }))
+      .onConflictDoUpdate({
+        target: dbSchema.productImages.id,
+        set: buildConflictUpdateColumns(dbSchema.productImages, [
+          'url',
+        ]),
+      })
+
+    for (const option of product.options) {
+      await db
+        .insert(dbSchema.productOptions)
+        .values({
+          id: option.id,
+          productId: product.id,
+          name: option.name,
+          index: option.index,
+          position: option.position,
+        })
+        .onConflictDoUpdate({
+          target: dbSchema.productOptions.id,
+          set: buildConflictUpdateColumns(dbSchema.productOptions, [
+            'name',
+            'index',
+            'position',
+          ]),
+        })
+
+      await db
+        .insert(dbSchema.productOptionValues)
+        .values(option.values.map((value) => {
+          return {
+            ...value,
+            productOptionId: option.id,
+          }
+        }))
+        .onConflictDoUpdate({
+          target: dbSchema.productOptionValues.id,
+          set: buildConflictUpdateColumns(dbSchema.productOptionValues, [
+            'value',
+            'position',
+          ]),
+        })
+    }
+
+    await db
+      .insert(dbSchema.productVariants)
       .values(product.variants.map((variant) => {
         return {
           ...variant,
@@ -252,50 +175,15 @@ import { db, postgresConnection } from './db'
         }
       }))
       .onConflictDoUpdate({
-        target: dbSchema.variants.id,
-        set: buildConflictUpdateColumns(dbSchema.variants, [
-          'name',
-          'productId',
+        target: dbSchema.productVariants.id,
+        set: buildConflictUpdateColumns(dbSchema.productVariants, [
+          'title',
+          'sku',
+          'price',
+          'imageId',
+          'optionValueId1',
         ]),
       })
-
-    for (const productColor of product.productColors) {
-      const productColorDb = await db
-        .insert(dbSchema.productColors)
-        .values({
-          ...productColor,
-          productId: product.id,
-        })
-        .onConflictDoUpdate({
-          target: [dbSchema.productColors.productId, dbSchema.productColors.color],
-          set: buildConflictUpdateColumns(dbSchema.productColors, [
-            'name',
-            'color',
-            'slug',
-            'imageUrls',
-          ]),
-        })
-        .returning()
-
-      await db
-        .insert(dbSchema.variantOptions)
-        .values(productColor.variantOptions.map((variantOption) => {
-          return {
-            ...variantOption,
-            productColorId: productColorDb[0].id,
-          }
-        }))
-        .onConflictDoUpdate({
-          target: [dbSchema.variantOptions.variantId, dbSchema.variantOptions.productColorId, dbSchema.variantOptions.name],
-          set: buildConflictUpdateColumns(dbSchema.variantOptions, [
-            'name',
-            'sku',
-            'stock',
-            'price',
-          ]),
-        })
-    }
   }
-
   postgresConnection.end()
 })()
