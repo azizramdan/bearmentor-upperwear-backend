@@ -28,4 +28,11 @@ export async function getAll() {
   })
 
   return data
+    .map(product => ({
+      id: product.id,
+      title: product.title,
+      slug: product.slug,
+      images: product.images.map(image => image.url),
+      priceRange: product.variants.map(variant => variant.price),
+    }))
 }
