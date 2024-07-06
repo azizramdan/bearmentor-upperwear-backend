@@ -1,4 +1,4 @@
-import { doublePrecision, integer, pgEnum, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core'
+import { doublePrecision, index, integer, pgEnum, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core'
 import { createId } from '@paralleldrive/cuid2'
 import { relations } from 'drizzle-orm'
 
@@ -75,11 +75,38 @@ export const collectionItems = pgTable('collectionItems', {
   updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
 })
 
+export const customers = pgTable('customers', {
+  id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
+  firstName: varchar('firstName', { length: 255 }).notNull(),
+  lastName: varchar('lastName', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).unique().notNull(),
+  createdAt: timestamp('createdAt').defaultNow(),
+  updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
+})
+
+export const carts = pgTable(
+  'carts',
+  {
+    id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
+    customerId: varchar('customerId', { length: 255 }).references(() => customers.id),
+    sessionToken: varchar('sessionToken', { length: 255 }).notNull(),
+    productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
+    productVariantId: varchar('productVariantId', { length: 255 }).notNull().references(() => productVariants.id),
+    quantity: integer('quantity').notNull(),
+    createdAt: timestamp('createdAt').defaultNow(),
+    updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
+  },
+  t => ({
+    sessionTokenIdx: index().on(t.sessionToken),
+  }),
+)
+
 export const productsRelations = relations(products, ({ many }) => ({
   images: many(productImages),
   options: many(productOptions),
   variants: many(productVariants),
   collectionItems: many(collectionItems),
+  carts: many(carts),
 }))
 
 export const productImagesRelations = relations(productImages, ({ one, many }) => ({
@@ -108,7 +135,7 @@ export const productOptionValuesRelations = relations(productOptionValues, ({ on
   variants3: many(productVariants),
 }))
 
-export const productVariantsRelations = relations(productVariants, ({ one }) => ({
+export const productVariantsRelations = relations(productVariants, ({ one, many }) => ({
   product: one(products, {
     fields: [productVariants.productId],
     references: [products.id],
@@ -126,6 +153,7 @@ export const productVariantsRelations = relations(productVariants, ({ one }) => 
     fields: [productVariants.optionValueId3],
     references: [productOptionValues.id],
   }),
+  carts: many(carts),
 }))
 
 export const collectionsRelations = relations(collections, ({ many }) => ({
@@ -140,5 +168,24 @@ export const collectionItemsRelations = relations(collectionItems, ({ one }) => 
   product: one(products, {
     fields: [collectionItems.productId],
     references: [products.id],
+  }),
+}))
+
+export const customersRelations = relations(customers, ({ many }) => ({
+  carts: many(carts),
+}))
+
+export const cartsRelations = relations(carts, ({ one }) => ({
+  customer: one(customers, {
+    fields: [carts.customerId],
+    references: [customers.id],
+  }),
+  product: one(products, {
+    fields: [carts.productId],
+    references: [products.id],
+  }),
+  variant: one(productVariants, {
+    fields: [carts.productVariantId],
+    references: [productVariants.id],
   }),
 }))
