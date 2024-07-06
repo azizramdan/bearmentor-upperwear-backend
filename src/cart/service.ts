@@ -2,7 +2,7 @@ import { and, eq } from 'drizzle-orm'
 import type { z } from 'zod'
 import { db } from '../db/db'
 import * as dbSchema from '../db/schema'
-import type { AddToCartSchema } from './schema'
+import type { AddToCartSchema, UpdateCartItemSchema } from './schema'
 
 export async function getItemsBySessionToken(token: string) {
   const items = await db.query.carts.findMany({
@@ -66,6 +66,29 @@ export async function addItemToCart(token: string, body: z.infer<typeof AddToCar
         productVariantId: body.productVariantId,
         quantity: body.quantity,
       })
+
+    return true
+  } catch (error) {
+    console.error(error)
+
+    return false
+  }
+}
+
+export async function updateCartItem(token: string, id: string, body: z.infer<typeof UpdateCartItemSchema>) {
+  // TODO: validate stock
+  try {
+    await db
+      .update(dbSchema.carts)
+      .set({
+        quantity: body.quantity,
+      })
+      .where(
+        and(
+          eq(dbSchema.carts.id, id),
+          eq(dbSchema.carts.sessionToken, token),
+        ),
+      )
 
     return true
   } catch (error) {
