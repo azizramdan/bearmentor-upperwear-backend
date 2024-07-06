@@ -98,3 +98,28 @@ export const cartRoutes = new OpenAPIHono()
       })
     },
   )
+
+  .openapi(
+    {
+      method: 'delete',
+      path: '/{id}',
+      description: 'Delete cart item',
+      responses: {
+        200: {
+          description: 'Item deleted successfully',
+        },
+      },
+      tags: API_TAG,
+    },
+    async (c) => {
+      // TODO: if user is logged in, use user id instead of session token
+      const token = c.req.header('Session-Token') || ''
+      const id = c.req.param('id')!
+
+      await cartService.removeCartItem(token, id)
+
+      return c.json({
+        message: 'Success',
+      })
+    },
+  )

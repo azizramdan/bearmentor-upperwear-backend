@@ -97,3 +97,12 @@ export async function updateCartItem(token: string, id: string, body: z.infer<ty
     return false
   }
 }
+
+export async function removeCartItem(token: string, id: string) {
+  await db
+    .delete(dbSchema.carts)
+    .where(and(
+      eq(dbSchema.carts.id, id),
+      eq(dbSchema.carts.sessionToken, token),
+    ))
+}
