@@ -58,6 +58,24 @@ export async function getItemsBySessionToken(token: string) {
 
 export async function addItemToCart(token: string, body: z.infer<typeof AddToCartSchema>) {
   try {
+    const exists = await db.query.carts.findFirst({
+      columns: {
+        id: true,
+        quantity: true,
+      },
+      where: (and(
+        eq(dbSchema.carts.sessionToken, token),
+        eq(dbSchema.carts.productId, body.productId),
+        eq(dbSchema.carts.productVariantId, body.productVariantId),
+      )),
+    })
+
+    if (exists) {
+      await updateCartItem(token, exists.id, { quantity: exists.quantity + Number(body.quantity) })
+
+      return true
+    }
+
     await db
       .insert(dbSchema.carts)
       .values({
