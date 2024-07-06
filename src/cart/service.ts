@@ -1,6 +1,8 @@
 import { and, eq } from 'drizzle-orm'
+import type { z } from 'zod'
 import { db } from '../db/db'
 import * as dbSchema from '../db/schema'
+import type { AddToCartSchema } from './schema'
 
 export async function getItemsBySessionToken(token: string) {
   const items = await db.query.carts.findMany({
@@ -52,4 +54,23 @@ export async function getItemsBySessionToken(token: string) {
   })
 
   return items
+}
+
+export async function addItemToCart(token: string, body: z.infer<typeof AddToCartSchema>) {
+  try {
+    await db
+      .insert(dbSchema.carts)
+      .values({
+        sessionToken: token,
+        productId: body.productId,
+        productVariantId: body.productVariantId,
+        quantity: body.quantity,
+      })
+
+    return true
+  } catch (error) {
+    console.error(error)
+
+    return false
+  }
 }

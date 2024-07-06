@@ -1,5 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi'
+import type { z } from 'zod'
 import * as cartService from './service'
+import { AddToCartSchema } from './schema'
 
 const API_TAG = ['Carts']
 
@@ -24,6 +26,40 @@ export const cartRoutes = new OpenAPIHono()
       return c.json({
         message: 'Success',
         data: products,
+      })
+    },
+  )
+
+  .openapi(
+    {
+      method: 'post',
+      path: '/',
+      description: 'Add item to cart',
+      request: {
+        body: {
+          content: {
+            'application/json': {
+              schema: AddToCartSchema,
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Item added to cart successfully',
+        },
+      },
+      tags: API_TAG,
+    },
+    async (c) => {
+      // TODO: if user is logged in, use user id instead of session token
+      const token = c.req.header('Session-Token') || ''
+      const body = await c.req.json() as Awaited<z.infer<typeof AddToCartSchema>>
+
+      await cartService.addItemToCart(token, body)
+
+      return c.json({
+        message: 'Success',
       })
     },
   )
