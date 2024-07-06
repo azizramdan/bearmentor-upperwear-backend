@@ -10,6 +10,24 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "collectionItems" (
+	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"collectionId" varchar(255) NOT NULL,
+	"productId" varchar(255) NOT NULL,
+	"position" integer NOT NULL,
+	"createdAt" timestamp DEFAULT now(),
+	"updatedAt" timestamp DEFAULT now()
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "collections" (
+	"id" varchar(255) PRIMARY KEY NOT NULL,
+	"title" varchar(255) NOT NULL,
+	"slug" varchar(255) NOT NULL,
+	"createdAt" timestamp DEFAULT now(),
+	"updatedAt" timestamp DEFAULT now(),
+	CONSTRAINT "collections_slug_unique" UNIQUE("slug")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "productImages" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"productId" varchar(255) NOT NULL,
@@ -42,6 +60,7 @@ CREATE TABLE IF NOT EXISTS "productVariants" (
 	"productId" varchar(255) NOT NULL,
 	"title" varchar(255) NOT NULL,
 	"sku" varchar(255) NOT NULL,
+	"position" integer NOT NULL,
 	"price" double precision NOT NULL,
 	"imageId" varchar(255),
 	"optionValueId1" varchar(255) NOT NULL,
@@ -63,6 +82,18 @@ CREATE TABLE IF NOT EXISTS "products" (
 	"updatedAt" timestamp DEFAULT now(),
 	CONSTRAINT "products_slug_unique" UNIQUE("slug")
 );
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "collectionItems" ADD CONSTRAINT "collectionItems_collectionId_collections_id_fk" FOREIGN KEY ("collectionId") REFERENCES "public"."collections"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "collectionItems" ADD CONSTRAINT "collectionItems_productId_products_id_fk" FOREIGN KEY ("productId") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "productImages" ADD CONSTRAINT "productImages_productId_products_id_fk" FOREIGN KEY ("productId") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;

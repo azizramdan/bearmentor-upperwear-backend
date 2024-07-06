@@ -48,6 +48,7 @@ export const productVariants = pgTable('productVariants', {
   productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
   title: varchar('title', { length: 255 }).notNull(),
   sku: varchar('sku', { length: 255 }).unique().notNull(),
+  stock: integer('position').notNull(),
   price: doublePrecision('price').notNull(),
   imageId: varchar('imageId', { length: 255 }).references(() => productImages.id),
   optionValueId1: varchar('optionValueId1', { length: 255 }).notNull().references(() => productOptionValues.id),
@@ -57,10 +58,28 @@ export const productVariants = pgTable('productVariants', {
   updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
 })
 
+export const collections = pgTable('collections', {
+  id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
+  title: varchar('title', { length: 255 }).notNull(),
+  slug: varchar('slug', { length: 255 }).unique().notNull(),
+  createdAt: timestamp('createdAt').defaultNow(),
+  updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
+})
+
+export const collectionItems = pgTable('collectionItems', {
+  id: varchar('id', { length: 255 }).primaryKey().notNull().$defaultFn(() => createId()),
+  collectionId: varchar('collectionId', { length: 255 }).notNull().references(() => collections.id),
+  productId: varchar('productId', { length: 255 }).notNull().references(() => products.id),
+  position: integer('position').notNull(),
+  createdAt: timestamp('createdAt').defaultNow(),
+  updatedAt: timestamp('updatedAt').defaultNow().$onUpdate(() => new Date()),
+})
+
 export const productsRelations = relations(products, ({ many }) => ({
   images: many(productImages),
   options: many(productOptions),
   variants: many(productVariants),
+  collectionItems: many(collectionItems),
 }))
 
 export const productImagesRelations = relations(productImages, ({ one, many }) => ({
@@ -106,5 +125,20 @@ export const productVariantsRelations = relations(productVariants, ({ one }) => 
   optionValue3: one(productOptionValues, {
     fields: [productVariants.optionValueId3],
     references: [productOptionValues.id],
+  }),
+}))
+
+export const collectionsRelations = relations(collections, ({ many }) => ({
+  items: many(collectionItems),
+}))
+
+export const collectionItemsRelations = relations(collectionItems, ({ one }) => ({
+  collection: one(collections, {
+    fields: [collectionItems.collectionId],
+    references: [collections.id],
+  }),
+  product: one(products, {
+    fields: [collectionItems.productId],
+    references: [products.id],
   }),
 }))
