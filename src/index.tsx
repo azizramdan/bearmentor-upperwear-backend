@@ -7,7 +7,9 @@ import { collectionRoutes } from './collections/route'
 import { cartRoutes } from './cart/route'
 
 export default new OpenAPIHono({ strict: false })
-  .use('/api/*', cors())
+  .use('/api/*', cors({
+    origin: process.env.CORS_ORIGIN?.split(',') ?? [],
+  }))
 
   .route('/api/products', productRoutes)
   .route('/api/collections', collectionRoutes)
