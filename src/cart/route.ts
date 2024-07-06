@@ -20,7 +20,7 @@ export const cartRoutes = new OpenAPIHono()
     },
     async (c) => {
       // todo: if user is logged in, use user id instead of session token
-      const token = c.req.header('Session-Token') || ''
+      const token = c.req.header('X-Session-Token') || ''
       const products = await cartService.getItemsBySessionToken(token)
 
       return c.json({
@@ -53,7 +53,7 @@ export const cartRoutes = new OpenAPIHono()
     },
     async (c) => {
       // TODO: if user is logged in, use user id instead of session token
-      const token = c.req.header('Session-Token') || ''
+      const token = c.req.header('X-Session-Token') || ''
       const body = await c.req.json() as Awaited<z.infer<typeof AddToCartSchema>>
 
       await cartService.addItemToCart(token, body)
@@ -87,7 +87,7 @@ export const cartRoutes = new OpenAPIHono()
     },
     async (c) => {
       // TODO: if user is logged in, use user id instead of session token
-      const token = c.req.header('Session-Token') || ''
+      const token = c.req.header('X-Session-Token') || ''
       const id = c.req.param('id')!
       const body = await c.req.json() as Awaited<z.infer<typeof UpdateCartItemSchema>>
 
@@ -113,7 +113,7 @@ export const cartRoutes = new OpenAPIHono()
     },
     async (c) => {
       // TODO: if user is logged in, use user id instead of session token
-      const token = c.req.header('Session-Token') || ''
+      const token = c.req.header('X-Session-Token') || ''
       const id = c.req.param('id')!
 
       await cartService.removeCartItem(token, id)
