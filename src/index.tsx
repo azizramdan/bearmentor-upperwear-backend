@@ -3,11 +3,13 @@ import { OpenAPIHono } from '@hono/zod-openapi'
 import { cors } from 'hono/cors'
 import { WelcomePage } from './welcome'
 import { productRoutes } from './products/route'
+import { collectionRoutes } from './collections/route'
 
 export default new OpenAPIHono({ strict: false })
   .use('/api/*', cors())
 
   .route('/api/products', productRoutes)
+  .route('/api/collections', collectionRoutes)
 
   .doc31('/api-spec', {
     openapi: '3.1.0',
