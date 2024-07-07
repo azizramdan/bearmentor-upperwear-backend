@@ -14,7 +14,7 @@ app.use('/api/*', cors({
 
 app.route('/api/products', productRoutes)
 app.route('/api/collections', collectionRoutes)
-app.route('/api/carts', cartRoutes)
+app.route('/api/cart', cartRoutes)
 
 app.doc31('/api-spec', {
   openapi: '3.1.0',
