@@ -5,7 +5,7 @@ import { sessionToken } from '../middleware/session-token'
 import * as cartService from './service'
 import { AddToCartSchema, UpdateCartItemSchema } from './schema'
 
-const API_TAG = ['Carts']
+const API_TAG = ['Cart']
 
 const cartRoutes = new OpenAPIHono<SessionTokenEnv>()
 cartRoutes.use('/*', sessionToken)
